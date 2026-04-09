@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, API } from '@/App';
+import { AdminRealtimeBridge } from '@/components/RealtimeBridge';
 import axios from 'axios';
 import {
   Activity,
@@ -76,10 +77,10 @@ const AdminControlCenter = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
     setRefreshing(true);
     fetchData();
-  };
+  }, []);
 
   const toggleAutoMode = async () => {
     const newMode = settings?.assignment_mode === 'auto' ? 'manual' : 'auto';
@@ -113,6 +114,11 @@ const AdminControlCenter = () => {
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white" data-testid="admin-control-center">
+      {/* Realtime Bridge */}
+      {user?.user_id && (
+        <AdminRealtimeBridge userId={user.user_id} onRefresh={handleRefresh} />
+      )}
+      
       {/* Header */}
       <header className="border-b border-zinc-800 bg-black/80 backdrop-blur-xl sticky top-0 z-50">
         <div className="max-w-[1800px] mx-auto px-6 h-16 flex items-center justify-between">

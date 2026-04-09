@@ -1,5 +1,7 @@
+import { useState, useCallback } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/App';
+import { TesterRealtimeBridge } from '@/components/RealtimeBridge';
 import {
   LayoutDashboard,
   Shield,
@@ -13,11 +15,16 @@ const TesterLayout = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const handleLogout = async () => {
     await logout();
     navigate('/');
   };
+
+  const handleRefresh = useCallback(() => {
+    setRefreshKey(k => k + 1);
+  }, []);
 
   const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + '/');
 
@@ -30,6 +37,10 @@ const TesterLayout = () => {
 
   return (
     <div className="min-h-screen bg-black text-white flex" data-testid="tester-layout">
+      {/* Realtime Bridge */}
+      {user?.user_id && (
+        <TesterRealtimeBridge userId={user.user_id} onRefresh={handleRefresh} />
+      )}
       {/* Sidebar */}
       <aside className="w-64 border-r border-white/10 flex flex-col sticky top-0 h-screen">
         {/* Logo */}
