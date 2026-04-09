@@ -1,10 +1,7 @@
 # Development OS - Execution Platform
 
 ## Project Overview
-**Name:** Development OS (Execution Platform)
-**Type:** Client ↔ Platform ↔ Executor System  
 **Tech Stack:** React + FastAPI + MongoDB + Socket.IO  
-**Date Started:** April 8, 2026  
 **Last Updated:** April 9, 2026
 **Deployed:** https://deployment-preview-11.preview.emergentagent.com
 
@@ -12,79 +9,65 @@
 
 ## Recent Changes
 
-### April 9, 2026 - Landing Page Redesign
-- Fixed runtime error in TerminalDemo component
-- Complete redesign in Emergent style with:
-  - Glassmorphism navigation
-  - Hero section with animated terminal
-  - Bento grid workflow (Submit → Execute → Ship)
-  - Builders section with developer image
-  - Modern CTA sections
-  - Proper depth, gradients, and shadows
+### April 9, 2026 - Real-time Toast System
+- Enhanced Toast component with action buttons + description
+- RealtimeBridge for all roles with navigation callbacks
+- Slide-in-right animation for toasts
+- Connected to WebSocket events
+
+### April 9, 2026 - Auth & Landing Redesign  
+- Fixed auth forms: dark inputs, fixed Back button
+- Header: Log in + Get Started (no duplicates)
+- Emergent-style landing with bento grid
 
 ---
 
-## Architecture Summary
+## Architecture
 
 ### 3 Cabinets
+1. **CLIENT** - /client/* - Projects, Deliverables, Support
+2. **EXECUTOR** - /developer/*, /tester/* - Kanban, Assignments, Validation
+3. **ADMIN** - /admin/* - Control Center, Pipeline, Alerts
 
-#### 1. CLIENT CABINET
-- **Routes:** `/client/*`
-- **Features:** Dashboard, Projects, Deliverables, Support tickets
-
-#### 2. EXECUTOR CABINET
-- **Routes:** `/developer/*`, `/tester/*`  
-- **Features:** Kanban Board, Assignments, Time Tracking, Validation
-
-#### 3. ADMIN CABINET
-- **Routes:** `/admin/*`
-- **Features:** Control Center, Pipeline, Review queue, Deliverable builder
+### Real-time System
+- Socket.IO server integrated in FastAPI
+- Room-based routing: user:{id}, role:{role}, project:{id}
+- RealtimeBridge components per role
+- Toast notifications with action buttons
 
 ---
 
-## Core Flow
-```
-CLIENT → REQUEST → ADMIN (scope) → EXECUTOR (build) → ADMIN (review) → VALIDATION → DELIVERABLE → CLIENT
-```
+## Event Priority
+
+### HIGH (toast + action)
+- workunit.assigned
+- workunit.revision_requested
+- deliverable.created
+- alert.created
+
+### MEDIUM (toast)
+- project.updated
+- support.updated
+- submission.reviewed
+
+### LOW (silent refresh)
+- Background stats updates
 
 ---
 
-## What's Implemented
+## Backlog
 
-### Landing Page (NEW)
-- ✅ Modern Emergent-style design
-- ✅ Animated terminal demo
-- ✅ Bento grid workflow section
-- ✅ Builders recruitment section
-- ✅ All navigation and CTAs working
-
-### Real-time (Socket.IO)
-- ✅ workunit.assigned → developer
-- ✅ submission.created → admin
-- ✅ validation.created → tester
-- ✅ workunit.revision_requested → developer
-
-### Authentication
-- ✅ Email/password registration
-- ✅ Demo access for all roles
-- ✅ Session management
-
----
-
-## Prioritized Backlog
-
-### P0 - Real-time Enhancement
-- [ ] Toast notifications on events
-- [ ] deliverable.created → client
-
-### P1 - In-app Notifications
-- [ ] 🔔 icon with unread count
+### P1 - In-app Notification Center (NEXT)
+- [ ] 🔔 Bell icon in header
+- [ ] Unread count badge
+- [ ] Dropdown with notification history
 - [ ] Mark as read
 
 ### P2 - Timer
 - [ ] Start/Stop tracking
+- [ ] Work log integration
 
-### P3 - System Feedback
+### P3 - System Feedback Loop
 - [ ] Performance messages
 
 ### P4 - i18n
@@ -94,6 +77,7 @@ CLIENT → REQUEST → ADMIN (scope) → EXECUTOR (build) → ADMIN (review) →
 
 ## URLs
 - Landing: /
-- Client Auth: /client/auth
-- Builder Auth: /builder/auth  
-- Admin Login: /admin/login
+- Client: /client/auth, /client/dashboard
+- Builder: /builder/auth, /developer/dashboard
+- Tester: /tester/dashboard
+- Admin: /admin/login, /admin/control-center
