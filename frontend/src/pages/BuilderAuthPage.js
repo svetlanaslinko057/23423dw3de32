@@ -76,7 +76,7 @@ const BuilderAuthPage = () => {
           <div className="w-full max-w-[400px]">
             {/* Logo */}
             <div className="flex items-center gap-3 mb-8">
-              <div className="w-11 h-11 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20">
+              <div className="w-11 h-11 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
                 <Code2 className="w-6 h-6 text-white" />
               </div>
               <div>
@@ -99,7 +99,7 @@ const BuilderAuthPage = () => {
                 onClick={() => setMode('signin')}
                 className={`flex-1 py-3 text-sm font-medium rounded-lg transition-all ${
                   mode === 'signin' 
-                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20' 
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' 
                     : 'text-white/50 hover:text-white'
                 }`}
                 data-testid="tab-signin"
@@ -110,7 +110,7 @@ const BuilderAuthPage = () => {
                 onClick={() => setMode('register')}
                 className={`flex-1 py-3 text-sm font-medium rounded-lg transition-all ${
                   mode === 'register' 
-                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20' 
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' 
                     : 'text-white/50 hover:text-white'
                 }`}
                 data-testid="tab-register"
@@ -136,7 +136,7 @@ const BuilderAuthPage = () => {
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                     placeholder="Your name"
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500 focus:bg-white/10 transition-all"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder:text-white/30 focus:outline-none focus:border-blue-500 focus:bg-white/10 transition-all"
                     required={mode === 'register'}
                     data-testid="input-name"
                   />
@@ -150,7 +150,7 @@ const BuilderAuthPage = () => {
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   placeholder="you@email.com"
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500 focus:bg-white/10 transition-all"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder:text-white/30 focus:outline-none focus:border-blue-500 focus:bg-white/10 transition-all"
                   required
                   data-testid="input-email"
                 />
@@ -164,7 +164,7 @@ const BuilderAuthPage = () => {
                     value={form.password}
                     onChange={(e) => setForm({ ...form, password: e.target.value })}
                     placeholder="••••••••"
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500 focus:bg-white/10 transition-all pr-12"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder:text-white/30 focus:outline-none focus:border-blue-500 focus:bg-white/10 transition-all pr-12"
                     required
                     data-testid="input-password"
                   />
@@ -181,7 +181,7 @@ const BuilderAuthPage = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-purple-600 hover:bg-purple-500 text-white font-medium py-4 rounded-xl transition-all shadow-lg shadow-purple-600/20 hover:shadow-purple-500/30 flex items-center justify-center gap-2 mt-6"
+                className="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-4 rounded-xl transition-all shadow-lg shadow-blue-600/20 hover:shadow-blue-500/30 flex items-center justify-center gap-2 mt-6"
                 data-testid="submit-btn"
               >
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : mode === 'signin' ? 'Sign In' : 'Create Account'}
@@ -205,7 +205,7 @@ const BuilderAuthPage = () => {
               className="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white font-medium py-4 rounded-xl transition-all flex items-center justify-center gap-2"
               data-testid="demo-btn"
             >
-              <Terminal className="w-5 h-5 text-purple-400" />
+              <Terminal className="w-5 h-5 text-blue-400" />
               Try Demo Workspace
             </button>
           </div>
@@ -215,8 +215,8 @@ const BuilderAuthPage = () => {
       {/* Right - Visual Side */}
       <div className="hidden lg:flex w-1/2 relative overflow-hidden">
         {/* Background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-bl from-purple-600/20 via-blue-600/10 to-transparent" />
-        <div className="absolute top-1/3 right-1/4 w-[600px] h-[600px] bg-purple-600/20 rounded-full blur-[150px]" />
+        <div className="absolute inset-0 bg-gradient-to-bl from-blue-600/20 via-blue-600/5 to-transparent" />
+        <div className="absolute top-1/3 right-1/4 w-[600px] h-[600px] bg-blue-600/15 rounded-full blur-[150px]" />
         
         <div className="relative z-10 w-full flex items-center justify-center p-12">
           <WorkflowAnimation />
@@ -285,13 +285,13 @@ const WorkflowAnimation = () => {
               {line.text}
             </div>
           ))}
-          <span className="inline-block w-2 h-5 bg-purple-500 animate-pulse" />
+          <span className="inline-block w-2 h-5 bg-blue-500 animate-pulse" />
         </div>
       </div>
 
       {/* Stats below */}
       <div className="grid grid-cols-3 gap-4 mt-8">
-        <StatBlock label="Builders" value="200+" color="purple" />
+        <StatBlock label="Builders" value="200+" color="blue" />
         <StatBlock label="Projects" value="500+" color="blue" />
         <StatBlock label="Delivery" value="98%" color="emerald" />
       </div>
@@ -315,7 +315,7 @@ const StatBlock = ({ label, value, color }) => (
 
 const Benefit = ({ icon, text }) => (
   <div className="flex items-center gap-3 text-white/60">
-    <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-purple-400">
+    <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-blue-400">
       {icon}
     </div>
     <span className="text-sm">{text}</span>
