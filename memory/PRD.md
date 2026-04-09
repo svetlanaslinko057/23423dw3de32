@@ -10,108 +10,82 @@
 
 ---
 
+## Recent Changes
+
+### April 9, 2026 - Landing Page Redesign
+- Fixed runtime error in TerminalDemo component
+- Complete redesign in Emergent style with:
+  - Glassmorphism navigation
+  - Hero section with animated terminal
+  - Bento grid workflow (Submit → Execute → Ship)
+  - Builders section with developer image
+  - Modern CTA sections
+  - Proper depth, gradients, and shadows
+
+---
+
 ## Architecture Summary
 
-### 3 Кабинета (Cabinets)
+### 3 Cabinets
 
 #### 1. CLIENT CABINET
-- **Purpose:** Контроль + результат
 - **Routes:** `/client/*`
-- **Features:**
-  - Dashboard (ClientHub)
-  - Projects management
-  - Deliverables review & approval
-  - Support tickets
+- **Features:** Dashboard, Projects, Deliverables, Support tickets
 
-#### 2. EXECUTOR CABINET (Единый)
-- **Purpose:** Выполнение работы (dev + designer + tester)
-- **Routes:** 
-  - `/developer/*` - Developer workspace
-  - `/tester/*` - Tester workspace
-- **Features:**
-  - Work Board (kanban-style)
-  - Assignments management
-  - Time Tracking
-  - Submissions flow
-  - Validation tasks
+#### 2. EXECUTOR CABINET
+- **Routes:** `/developer/*`, `/tester/*`  
+- **Features:** Kanban Board, Assignments, Time Tracking, Validation
 
 #### 3. ADMIN CABINET
-- **Purpose:** Оркестрация + QA
 - **Routes:** `/admin/*`
-- **Features:**
-  - Control Center
-  - Pipeline management
-  - System alerts
-  - Review queue
-  - Deliverable builder
-  - AUTO mode toggle
+- **Features:** Control Center, Pipeline, Review queue, Deliverable builder
 
 ---
 
 ## Core Flow
-
 ```
-CLIENT
-   ↓
-REQUEST
-   ↓
-ADMIN (структурирует)
-   ↓
-SCOPE → TASKS (Work Units)
-   ↓
-EXECUTOR (выполняет)
-   ↓
-ADMIN (ревью)
-   ↓
-VALIDATION (QA)
-   ↓
-DELIVERABLE
-   ↓
-CLIENT
+CLIENT → REQUEST → ADMIN (scope) → EXECUTOR (build) → ADMIN (review) → VALIDATION → DELIVERABLE → CLIENT
 ```
 
 ---
 
 ## What's Implemented
 
-### Real-time Events (Socket.IO)
+### Landing Page (NEW)
+- ✅ Modern Emergent-style design
+- ✅ Animated terminal demo
+- ✅ Bento grid workflow section
+- ✅ Builders recruitment section
+- ✅ All navigation and CTAs working
+
+### Real-time (Socket.IO)
 - ✅ workunit.assigned → developer
 - ✅ submission.created → admin
 - ✅ validation.created → tester
 - ✅ workunit.revision_requested → developer
-- ✅ submission.reviewed → developer
 
 ### Authentication
-- ✅ Quick auth (email-based)
-- ✅ Registration with roles
+- ✅ Email/password registration
 - ✅ Demo access for all roles
-- ✅ Admin login
-
-### All Cabinets
-- ✅ Client, Developer, Tester, Admin fully functional
+- ✅ Session management
 
 ---
 
 ## Prioritized Backlog
 
-### P0 - Real-time Enhancement (NEXT)
-- [ ] Toast notifications on real-time events
-- [ ] deliverable.created → client notification
-- [ ] project.updated events
+### P0 - Real-time Enhancement
+- [ ] Toast notifications on events
+- [ ] deliverable.created → client
 
 ### P1 - In-app Notifications
-- [ ] 🔔 icon with dropdown
-- [ ] Unread count badge
-- [ ] Mark as read functionality
+- [ ] 🔔 icon with unread count
+- [ ] Mark as read
 
 ### P2 - Timer
-- [ ] Start/Stop lightweight tracking
-- [ ] Integration with work logs
+- [ ] Start/Stop tracking
 
-### P3 - System Feedback Loop
-- [ ] Performance messages for executor
-- [ ] Accuracy tracking for tester
-- [ ] Project stage notifications for client
+### P3 - System Feedback
+- [ ] Performance messages
 
 ### P4 - i18n
 - [ ] After UI stabilization
@@ -123,7 +97,3 @@ CLIENT
 - Client Auth: /client/auth
 - Builder Auth: /builder/auth  
 - Admin Login: /admin/login
-- Client Dashboard: /client/dashboard
-- Developer Dashboard: /developer/dashboard
-- Tester Dashboard: /tester/dashboard
-- Admin Control Center: /admin/control-center
