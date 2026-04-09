@@ -87,6 +87,15 @@ const AuthProvider = ({ children }) => {
     checkAuth();
   }, [checkAuth]);
 
+  const login = async (email, password) => {
+    const response = await axios.post(`${API}/auth/login`, 
+      { email, password },
+      { withCredentials: true }
+    );
+    setUser(response.data);
+    return response.data;
+  };
+
   const logout = async () => {
     try {
       await axios.post(`${API}/auth/logout`, {}, { withCredentials: true });
@@ -97,7 +106,7 @@ const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, setUser, loading, logout, checkAuth }}>
+    <AuthContext.Provider value={{ user, setUser, loading, login, logout, checkAuth }}>
       {children}
     </AuthContext.Provider>
   );

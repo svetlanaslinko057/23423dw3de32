@@ -81,3 +81,27 @@
 - Builder: /builder/auth, /developer/dashboard
 - Tester: /tester/dashboard
 - Admin: /admin/login, /admin/control-center
+
+---
+
+## Security Audit - April 9, 2026
+
+### P0 Completed ✅
+
+1. **bcrypt password hashing**
+   - `hash_password()` with salt
+   - `verify_password()` secure comparison
+   - Old SHA-256 passwords deprecated
+
+2. **Socket.IO authentication**
+   - `authenticate` event verifies session
+   - Room join validation by user/role/project ownership
+   - Denied rooms logged
+
+3. **Ownership checks**
+   - `verify_deliverable_ownership()` helper
+   - Projects: client can only see own
+   - Deliverables: approve/reject require ownership
+
+### Migration Required
+- Users with SHA-256 passwords need password reset
