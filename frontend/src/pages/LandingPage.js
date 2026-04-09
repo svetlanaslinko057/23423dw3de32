@@ -11,35 +11,35 @@ const LandingPage = () => {
       <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-[#05050A]/80 border-b border-white/10">
         <div className="max-w-7xl mx-auto px-6 sm:px-12 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20">
+            <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
               <span className="text-white font-bold text-sm">D</span>
             </div>
             <span className="font-semibold text-lg tracking-tight">Dev OS</span>
           </div>
           
           <div className="hidden md:flex items-center gap-8">
-            <a href="#workflow" className="text-sm text-white/60 hover:text-white transition-colors" data-testid="nav-workflow">
+            <a href="#workflow" className="text-sm text-white/50 hover:text-white transition-colors" data-testid="nav-workflow">
               How it works
             </a>
-            <a href="#builders" className="text-sm text-white/60 hover:text-white transition-colors" data-testid="nav-builders">
+            <a href="#builders" className="text-sm text-white/50 hover:text-white transition-colors" data-testid="nav-builders">
               For Builders
             </a>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <button 
               onClick={() => navigate('/builder/auth')}
-              className="hidden sm:flex text-sm text-white/70 hover:text-white transition-colors px-4 py-2"
-              data-testid="nav-join"
+              className="hidden sm:flex text-sm text-white/50 hover:text-white transition-colors px-4 py-2 hover:bg-white/5 rounded-xl"
+              data-testid="nav-login"
             >
-              Join as Builder
+              Log in
             </button>
             <button 
               onClick={() => navigate('/client/auth')}
-              className="bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-all shadow-lg shadow-blue-600/20 hover:shadow-blue-500/30"
+              className="bg-white hover:bg-white/90 text-black text-sm font-medium px-5 py-2.5 rounded-xl transition-all"
               data-testid="nav-start"
             >
-              Start Project
+              Get Started
             </button>
           </div>
         </div>
