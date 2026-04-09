@@ -1,0 +1,47 @@
+{
+  "total_tests": 8,
+  "passed_tests": 8,
+  "test_results": [
+    {
+      "test": "bcrypt_registration",
+      "status": "PASS",
+      "details": "User registered with bcrypt, user_id: user_857c93939e0e"
+    },
+    {
+      "test": "correct_password_login",
+      "status": "PASS",
+      "details": "Login successful with bcrypt verification"
+    },
+    {
+      "test": "wrong_password_login",
+      "status": "PASS",
+      "details": "Wrong password correctly rejected with 401"
+    },
+    {
+      "test": "demo_login",
+      "status": "PASS",
+      "details": "Demo login successful, user_id: user_39cc717a4a48"
+    },
+    {
+      "test": "auth_me_no_token",
+      "status": "PASS",
+      "details": "/auth/me correctly returns 401 without token"
+    },
+    {
+      "test": "auth_me_with_token",
+      "status": "PASS",
+      "details": "/auth/me returns user data without password hash"
+    },
+    {
+      "test": "own_project_access",
+      "status": "PASS",
+      "details": "Successfully accessed own projects, count: 0"
+    },
+    {
+      "test": "nonexistent_project_access",
+      "status": "PASS",
+      "details": "Non-existent project correctly returns 404"
+    }
+  ],
+  "timestamp": "2026-04-09T21:31:23.800291"
+}

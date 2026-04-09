@@ -75,6 +75,27 @@ class RealtimeService:
 realtime = RealtimeService()
 
 # ============ SOCKET.IO EVENT HANDLERS ============
+
+# Store user info per socket connection
+socket_users = {}
+
+async def get_user_from_token(token: str):
+    """Verify session token and return user"""
+    if not token:
+        return None
+    session = await db.user_sessions.find_one({"session_token": token}, {"_id": 0})
+    if not session:
+        return None
+    expires_at = session["expires_at"]
+    if isinstance(expires_at, str):
+        expires_at = datetime.fromisoformat(expires_at)
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+    if expires_at < datetime.now(timezone.utc):
+        return None
+    user = await db.users.find_one({"user_id": session["user_id"]}, {"_id": 0})
+    return user
+
 @sio.event
 async def connect(sid, environ):
     logger.info(f"Socket connected: {sid}")
@@ -82,15 +103,71 @@ async def connect(sid, environ):
 @sio.event
 async def disconnect(sid):
     logger.info(f"Socket disconnected: {sid}")
+    socket_users.pop(sid, None)
+
+@sio.event
+async def authenticate(sid, data):
+    """Authenticate socket connection with session token"""
+    token = data.get('token')
+    user = await get_user_from_token(token)
+    if not user:
+        return {'ok': False, 'error': 'Invalid token'}
+    
+    socket_users[sid] = user
+    logger.info(f"Socket {sid} authenticated as {user['user_id']} ({user['role']})")
+    return {'ok': True, 'user_id': user['user_id'], 'role': user['role']}
 
 @sio.event
 async def join(sid, data):
-    """Join rooms based on user role and context"""
+    """Join rooms based on user role and context - WITH AUTH CHECK"""
+    # Check if authenticated
+    user = socket_users.get(sid)
+    if not user:
+        return {'ok': False, 'error': 'Not authenticated. Call authenticate first.'}
+    
     rooms = data.get('rooms', [])
+    allowed_rooms = []
+    denied_rooms = []
+    
     for room in rooms:
+        # Validate room access based on user
+        if room.startswith('user:'):
+            # Can only join own user room
+            if room == f"user:{user['user_id']}":
+                allowed_rooms.append(room)
+            else:
+                denied_rooms.append(room)
+        elif room.startswith('role:'):
+            # Can only join own role room
+            if room == f"role:{user['role']}":
+                allowed_rooms.append(room)
+            else:
+                denied_rooms.append(room)
+        elif room.startswith('project:'):
+            # For clients: verify ownership. For admin: allow all
+            if user['role'] == 'admin':
+                allowed_rooms.append(room)
+            elif user['role'] == 'client':
+                project_id = room.replace('project:', '')
+                project = await db.projects.find_one({"project_id": project_id, "client_id": user['user_id']})
+                if project:
+                    allowed_rooms.append(room)
+                else:
+                    denied_rooms.append(room)
+            else:
+                # Developers/testers can join project rooms they have assignments in
+                allowed_rooms.append(room)  # TODO: stricter check
+        else:
+            denied_rooms.append(room)
+    
+    for room in allowed_rooms:
         await sio.enter_room(sid, room)
         logger.info(f"Socket {sid} joined room: {room}")
-    return {'ok': True, 'joined': rooms}
+    
+    if denied_rooms:
+        logger.warning(f"Socket {sid} denied rooms: {denied_rooms}")
+    
+    return {'ok': True, 'joined': allowed_rooms, 'denied': denied_rooms}
 
 @sio.event
 async def leave(sid, data):
@@ -525,11 +602,18 @@ class DemoRequest(BaseModel):
     role: str = "client"
 
 
-import hashlib
+import bcrypt
 
 def hash_password(password: str) -> str:
-    """Simple password hashing"""
-    return hashlib.sha256(password.encode()).hexdigest()
+    """Secure password hashing with bcrypt"""
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+
+def verify_password(password: str, hashed: str) -> bool:
+    """Verify password against bcrypt hash"""
+    try:
+        return bcrypt.checkpw(password.encode(), hashed.encode())
+    except Exception:
+        return False
 
 
 @api_router.post("/auth/register")
@@ -605,8 +689,12 @@ async def login_user(req: LoginRequest, response: Response):
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
-    # Check password
-    if user.get("password_hash") and user["password_hash"] != hash_password(req.password):
+    # Check password with bcrypt
+    if user.get("password_hash"):
+        if not verify_password(req.password, user["password_hash"]):
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+    else:
+        # Legacy user without password (OAuth only)
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
     # Create session
@@ -1051,6 +1139,10 @@ async def get_project(project_id: str, user: User = Depends(get_current_user)):
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
     
+    # Ownership check: client can only see own projects
+    if user.role == "client" and project.get("client_id") != user.user_id:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
     if isinstance(project.get("created_at"), str):
         project["created_at"] = datetime.fromisoformat(project["created_at"])
     return Project(**project)
@@ -1059,11 +1151,36 @@ async def get_project(project_id: str, user: User = Depends(get_current_user)):
 @api_router.get("/projects/{project_id}/deliverables", response_model=List[Deliverable])
 async def get_project_deliverables(project_id: str, user: User = Depends(get_current_user)):
     """Client: Get project deliverables"""
+    # Ownership check
+    project = await db.projects.find_one({"project_id": project_id}, {"_id": 0})
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    if user.role == "client" and project.get("client_id") != user.user_id:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
     deliverables = await db.deliverables.find({"project_id": project_id}, {"_id": 0}).to_list(100)
     for d in deliverables:
         if isinstance(d.get("created_at"), str):
             d["created_at"] = datetime.fromisoformat(d["created_at"])
     return deliverables
+
+
+async def verify_deliverable_ownership(deliverable_id: str, user: User) -> dict:
+    """Helper to verify client owns the deliverable"""
+    deliverable = await db.deliverables.find_one({"deliverable_id": deliverable_id}, {"_id": 0})
+    if not deliverable:
+        raise HTTPException(status_code=404, detail="Deliverable not found")
+    
+    # Admin can access all
+    if user.role == "admin":
+        return deliverable
+    
+    # Client must own the project
+    project = await db.projects.find_one({"project_id": deliverable["project_id"]}, {"_id": 0})
+    if not project or (user.role == "client" and project.get("client_id") != user.user_id):
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    return deliverable
 
 
 @api_router.post("/deliverables/{deliverable_id}/approve")
@@ -1073,10 +1190,8 @@ async def approve_deliverable(
     user: User = Depends(get_current_user)
 ):
     """Client: Approve deliverable"""
-    # Get deliverable to update project progress
-    deliverable = await db.deliverables.find_one({"deliverable_id": deliverable_id}, {"_id": 0})
-    if not deliverable:
-        raise HTTPException(status_code=404, detail="Deliverable not found")
+    # Ownership check
+    deliverable = await verify_deliverable_ownership(deliverable_id, user)
     
     result = await db.deliverables.update_one(
         {"deliverable_id": deliverable_id},
@@ -1104,9 +1219,8 @@ async def reject_deliverable(
     user: User = Depends(get_current_user)
 ):
     """Client: Reject deliverable and create support ticket"""
-    deliverable = await db.deliverables.find_one({"deliverable_id": deliverable_id}, {"_id": 0})
-    if not deliverable:
-        raise HTTPException(status_code=404, detail="Deliverable not found")
+    # Ownership check
+    deliverable = await verify_deliverable_ownership(deliverable_id, user)
     
     result = await db.deliverables.update_one(
         {"deliverable_id": deliverable_id},
@@ -1138,9 +1252,8 @@ async def get_deliverable(
     user: User = Depends(get_current_user)
 ):
     """Get single deliverable with full details"""
-    deliverable = await db.deliverables.find_one({"deliverable_id": deliverable_id}, {"_id": 0})
-    if not deliverable:
-        raise HTTPException(status_code=404, detail="Deliverable not found")
+    # Ownership check
+    deliverable = await verify_deliverable_ownership(deliverable_id, user)
     
     if isinstance(deliverable.get("created_at"), str):
         deliverable["created_at"] = datetime.fromisoformat(deliverable["created_at"])
