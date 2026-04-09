@@ -9,7 +9,8 @@ import {
   CheckCircle2,
   ArrowUpRight,
   Search,
-  Filter
+  ChevronRight,
+  Layers
 } from 'lucide-react';
 
 const ClientProjects = () => {
@@ -53,24 +54,47 @@ const ClientProjects = () => {
   const pendingRequests = requests.filter(r => r.status === 'pending');
 
   return (
-    <div className="p-8" data-testid="client-projects">
+    <div className="min-h-screen p-8" data-testid="client-projects">
+      {/* Background */}
+      <div className="fixed top-0 right-0 w-[600px] h-[600px] bg-blue-600/5 rounded-full blur-[150px] pointer-events-none" />
+      
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="relative flex items-center justify-between mb-10">
         <div>
-          <h1 className="text-2xl font-bold">Projects</h1>
-          <p className="text-white/50 mt-1">Manage and track your projects</p>
+          <h1 className="text-3xl font-semibold tracking-tight">Projects</h1>
+          <p className="text-white/40 mt-2">Manage and track your active projects</p>
         </div>
         <button
           onClick={() => navigate('/client/request/new')}
-          className="flex items-center gap-2 px-4 py-2.5 bg-white text-black rounded-xl font-medium hover:bg-white/90 transition-all"
+          className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-medium transition-all shadow-lg shadow-blue-600/20"
+          data-testid="new-project-btn"
         >
           <Plus className="w-4 h-4" />
           New Project
         </button>
       </div>
 
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-4 mb-8">
+        <StatCard 
+          label="Active" 
+          value={projects.filter(p => p.status === 'active').length}
+          color="blue"
+        />
+        <StatCard 
+          label="Completed" 
+          value={projects.filter(p => p.status === 'completed').length}
+          color="emerald"
+        />
+        <StatCard 
+          label="Pending" 
+          value={pendingRequests.length}
+          color="amber"
+        />
+      </div>
+
       {/* Search & Filter */}
-      <div className="flex items-center gap-4 mb-6">
+      <div className="flex items-center gap-4 mb-8">
         <div className="flex-1 relative">
           <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-white/30" />
           <input
@@ -78,18 +102,18 @@ const ClientProjects = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search projects..."
-            className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:border-white/30"
+            className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-white placeholder:text-white/30 focus:outline-none focus:border-blue-500/50 focus:bg-white/[0.07] transition-all"
           />
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 p-1 bg-white/5 rounded-xl border border-white/5">
           {['all', 'active', 'completed'].map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-4 py-2.5 rounded-xl text-sm capitalize transition-all ${
+              className={`px-5 py-2.5 rounded-lg text-sm capitalize transition-all ${
                 filter === f
-                  ? 'bg-white text-black font-medium'
-                  : 'border border-white/10 text-white/50 hover:text-white hover:border-white/20'
+                  ? 'bg-blue-600 text-white font-medium shadow-lg shadow-blue-600/20'
+                  : 'text-white/50 hover:text-white'
               }`}
             >
               {f}
@@ -100,17 +124,20 @@ const ClientProjects = () => {
 
       {loading ? (
         <div className="flex items-center justify-center h-64">
-          <div className="w-8 h-8 border-2 border-white/10 border-t-white rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-white/10 border-t-blue-500 rounded-full animate-spin" />
         </div>
       ) : filteredProjects.length === 0 && pendingRequests.length === 0 ? (
-        <div className="border border-white/10 border-dashed rounded-2xl p-12 text-center">
-          <FolderKanban className="w-12 h-12 text-white/20 mx-auto mb-4" />
-          <h3 className="text-lg font-medium mb-2">No projects yet</h3>
-          <p className="text-white/50 text-sm mb-6">Start by creating your first project request</p>
+        <div className="rounded-2xl border border-white/[0.06] bg-[#0A0A0F] p-16 text-center">
+          <div className="w-20 h-20 rounded-2xl bg-white/5 mx-auto mb-6 flex items-center justify-center">
+            <FolderKanban className="w-10 h-10 text-white/20" />
+          </div>
+          <h3 className="text-xl font-semibold mb-2">No projects yet</h3>
+          <p className="text-white/40 mb-8 max-w-md mx-auto">Start by creating your first project request. We'll help you scope and build it.</p>
           <button
             onClick={() => navigate('/client/request/new')}
-            className="px-6 py-3 bg-white text-black rounded-xl font-medium hover:bg-white/90 transition-all"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-medium transition-all shadow-lg shadow-blue-600/20"
           >
+            <Plus className="w-4 h-4" />
             Create Your First Project
           </button>
         </div>
@@ -120,14 +147,14 @@ const ClientProjects = () => {
           {filter === 'all' && pendingRequests.map((request) => (
             <div
               key={request.request_id}
-              className="border border-amber-500/20 border-dashed rounded-xl p-5 bg-amber-500/5"
+              className="rounded-2xl border border-amber-500/20 bg-gradient-to-r from-amber-500/10 to-transparent p-6"
             >
               <div className="flex items-start justify-between">
                 <div>
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="font-semibold">{request.title}</h3>
-                    <span className="px-2 py-1 text-xs bg-amber-500/20 text-amber-400 rounded-lg">
-                      Pending Review
+                  <div className="flex items-center gap-3 mb-3">
+                    <h3 className="font-semibold text-lg">{request.title}</h3>
+                    <span className="px-3 py-1 text-xs bg-amber-500/20 text-amber-400 rounded-lg border border-amber-500/20">
+                      Processing
                     </span>
                   </div>
                   <p className="text-white/50 text-sm line-clamp-2">{request.business_idea}</p>
@@ -135,60 +162,89 @@ const ClientProjects = () => {
               </div>
               <div className="mt-4 flex items-center gap-2 text-amber-400/70 text-sm">
                 <Clock className="w-4 h-4" />
-                <span>Being processed by our team</span>
+                <span>Our team is reviewing your request</span>
               </div>
             </div>
           ))}
 
-          {/* Projects */}
-          {filteredProjects.map((project) => (
-            <div
-              key={project.project_id}
-              onClick={() => navigate(`/client/projects/${project.project_id}`)}
-              className="group border border-white/10 rounded-xl p-6 hover:border-white/20 hover:bg-white/[0.02] transition-all cursor-pointer"
-              data-testid={`project-card-${project.project_id}`}
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-lg font-semibold group-hover:text-white transition-colors">
-                      {project.name}
-                    </h3>
-                    <span className={`px-2 py-1 text-xs rounded-lg ${
-                      project.status === 'active' 
-                        ? 'bg-emerald-500/10 text-emerald-400' 
-                        : project.status === 'completed'
-                        ? 'bg-blue-500/10 text-blue-400'
-                        : 'bg-white/5 text-white/50'
-                    }`}>
-                      {project.status}
-                    </span>
-                  </div>
-                  <p className="text-white/50 text-sm capitalize">Stage: {project.current_stage}</p>
-                </div>
-                <ArrowUpRight className="w-5 h-5 text-white/30 group-hover:text-white transition-colors" />
-              </div>
-              
-              <div>
-                <div className="flex items-center justify-between text-xs mb-2">
-                  <span className="text-white/40">Progress</span>
-                  <span className="text-white/60">{getStageProgress(project.current_stage)}%</span>
-                </div>
-                <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                  <div 
-                    className={`h-full rounded-full transition-all ${
-                      project.status === 'completed' ? 'bg-emerald-400' : 'bg-white'
-                    }`}
-                    style={{ width: `${getStageProgress(project.current_stage)}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
+          {/* Projects Grid */}
+          <div className="grid gap-4">
+            {filteredProjects.map((project) => (
+              <ProjectCard 
+                key={project.project_id}
+                project={project}
+                progress={getStageProgress(project.current_stage)}
+                onClick={() => navigate(`/client/projects/${project.project_id}`)}
+              />
+            ))}
+          </div>
         </div>
       )}
     </div>
   );
 };
+
+// Stat Card
+const StatCard = ({ label, value, color }) => {
+  const colors = {
+    blue: 'text-blue-400',
+    emerald: 'text-emerald-400',
+    amber: 'text-amber-400'
+  };
+  
+  return (
+    <div className="p-5 rounded-2xl border border-white/[0.06] bg-[#0A0A0F]">
+      <div className="text-xs font-medium text-white/40 uppercase tracking-wide mb-2">{label}</div>
+      <div className={`text-3xl font-semibold ${colors[color]}`}>{value}</div>
+    </div>
+  );
+};
+
+// Project Card
+const ProjectCard = ({ project, progress, onClick }) => (
+  <button
+    onClick={onClick}
+    className="w-full text-left p-6 rounded-2xl border border-white/[0.06] bg-[#0A0A0F] hover:border-blue-500/30 hover:bg-[#0D0D14] transition-all group"
+    data-testid={`project-card-${project.project_id}`}
+  >
+    <div className="flex items-start justify-between mb-4">
+      <div className="flex items-center gap-4">
+        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-500/20 flex items-center justify-center">
+          <Layers className="w-5 h-5 text-blue-400" />
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold group-hover:text-blue-400 transition-colors">
+            {project.name}
+          </h3>
+          <p className="text-white/40 text-sm capitalize">Stage: {project.current_stage}</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-3">
+        <span className={`px-3 py-1.5 text-xs rounded-lg border ${
+          project.status === 'active' 
+            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
+            : project.status === 'completed'
+            ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+            : 'bg-white/5 text-white/50 border-white/10'
+        }`}>
+          {project.status}
+        </span>
+        <ChevronRight className="w-5 h-5 text-white/20 group-hover:text-blue-400 transition-colors" />
+      </div>
+    </div>
+    
+    <div className="flex items-center gap-4">
+      <div className="flex-1">
+        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full transition-all"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      </div>
+      <span className="text-sm text-white/50 font-medium">{progress}%</span>
+    </div>
+  </button>
+);
 
 export default ClientProjects;

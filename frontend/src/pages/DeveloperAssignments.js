@@ -8,7 +8,8 @@ import {
   AlertCircle,
   CheckCircle2,
   ChevronRight,
-  Loader2
+  Loader2,
+  ClipboardList
 } from 'lucide-react';
 
 const DeveloperAssignments = () => {
@@ -41,29 +42,33 @@ const DeveloperAssignments = () => {
   const currentTab = tabs.find(t => t.id === activeTab);
   const filteredUnits = workUnits.filter(currentTab.filter);
 
-  // Sort: revision first, then by priority
   const sortedUnits = [...filteredUnits].sort((a, b) => {
     if (a.status === 'revision' && b.status !== 'revision') return -1;
     if (b.status === 'revision' && a.status !== 'revision') return 1;
     return 0;
   });
 
-  const revisionCount = workUnits.filter(u => u.status === 'revision').length;
-
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <Loader2 className="w-6 h-6 animate-spin text-zinc-500" />
+      <div className="flex items-center justify-center h-64">
+        <div className="w-8 h-8 border-2 border-white/10 border-t-blue-500 rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="p-6" data-testid="developer-assignments">
-      <h1 className="text-2xl font-semibold mb-6">Assignments</h1>
+    <div className="min-h-screen p-8" data-testid="developer-assignments">
+      {/* Background */}
+      <div className="fixed top-0 right-0 w-[600px] h-[600px] bg-blue-600/5 rounded-full blur-[150px] pointer-events-none" />
+      
+      {/* Header */}
+      <div className="relative mb-10">
+        <h1 className="text-3xl font-semibold tracking-tight">Assignments</h1>
+        <p className="text-white/40 mt-2">All your assigned work units</p>
+      </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-6 border-b border-zinc-800">
+      <div className="flex gap-2 p-1 bg-white/5 rounded-xl border border-white/5 mb-8 w-fit">
         {tabs.map((tab) => {
           const count = workUnits.filter(tab.filter).length;
           const isRevision = tab.id === 'revision' && count > 0;
@@ -71,16 +76,20 @@ const DeveloperAssignments = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-all ${
+              className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
                 activeTab === tab.id
-                  ? 'border-white text-white'
-                  : 'border-transparent text-zinc-500 hover:text-zinc-300'
+                  ? isRevision 
+                    ? 'bg-red-600 text-white shadow-lg shadow-red-600/20' 
+                    : 'bg-blue-600 text-white shadow-lg shadow-blue-600/20'
+                  : 'text-white/50 hover:text-white'
               }`}
             >
               {tab.label}
               {count > 0 && (
-                <span className={`ml-2 px-1.5 py-0.5 text-xs rounded ${
-                  isRevision ? 'bg-red-500 text-white' : 'bg-zinc-800 text-zinc-400'
+                <span className={`px-2 py-0.5 text-xs rounded-lg ${
+                  activeTab === tab.id 
+                    ? 'bg-white/20' 
+                    : isRevision ? 'bg-red-500/20 text-red-400' : 'bg-white/10 text-white/50'
                 }`}>
                   {count}
                 </span>
@@ -92,11 +101,15 @@ const DeveloperAssignments = () => {
 
       {/* List */}
       {sortedUnits.length === 0 ? (
-        <div className="border border-zinc-800 border-dashed rounded-xl p-12 text-center">
-          <p className="text-zinc-500 text-sm">No tasks in this category</p>
+        <div className="rounded-2xl border border-white/[0.06] bg-[#0A0A0F] p-16 text-center">
+          <div className="w-20 h-20 rounded-2xl bg-white/5 mx-auto mb-6 flex items-center justify-center">
+            <ClipboardList className="w-10 h-10 text-white/20" />
+          </div>
+          <h3 className="text-xl font-semibold mb-2">No tasks here</h3>
+          <p className="text-white/40">Tasks matching this filter will appear here</p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {sortedUnits.map((unit) => (
             <AssignmentCard 
               key={unit.unit_id} 
@@ -114,19 +127,19 @@ const AssignmentCard = ({ unit, onClick }) => {
   const getStatusConfig = (status) => {
     switch (status) {
       case 'assigned':
-        return { icon: Play, color: 'text-zinc-400', bg: 'bg-zinc-800', label: 'New' };
+        return { icon: Play, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20', label: 'New' };
       case 'in_progress':
-        return { icon: Play, color: 'text-blue-400', bg: 'bg-blue-500/20', label: 'In Progress' };
+        return { icon: Play, color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20', label: 'In Progress' };
       case 'submitted':
-        return { icon: Clock, color: 'text-yellow-400', bg: 'bg-yellow-500/20', label: 'Submitted' };
+        return { icon: Clock, color: 'text-cyan-400', bg: 'bg-cyan-500/10', border: 'border-cyan-500/20', label: 'Submitted' };
       case 'validation':
-        return { icon: Clock, color: 'text-purple-400', bg: 'bg-purple-500/20', label: 'Validating' };
+        return { icon: Clock, color: 'text-cyan-400', bg: 'bg-cyan-500/10', border: 'border-cyan-500/20', label: 'Validating' };
       case 'revision':
-        return { icon: AlertCircle, color: 'text-red-400', bg: 'bg-red-500/20', label: 'Fix Required' };
+        return { icon: AlertCircle, color: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/20', label: 'Fix Required' };
       case 'completed':
-        return { icon: CheckCircle2, color: 'text-emerald-400', bg: 'bg-emerald-500/20', label: 'Done' };
+        return { icon: CheckCircle2, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', label: 'Done' };
       default:
-        return { icon: Clock, color: 'text-zinc-400', bg: 'bg-zinc-800', label: status };
+        return { icon: Clock, color: 'text-white/40', bg: 'bg-white/5', border: 'border-white/10', label: status };
     }
   };
 
@@ -137,30 +150,32 @@ const AssignmentCard = ({ unit, onClick }) => {
   return (
     <button
       onClick={onClick}
-      className={`w-full text-left border rounded-xl p-4 flex items-center justify-between transition-all group ${
+      className={`w-full text-left rounded-2xl p-5 flex items-center justify-between transition-all group ${
         isRevision 
-          ? 'border-red-500/30 bg-red-500/5 hover:bg-red-500/10' 
-          : 'border-zinc-800 bg-[#111] hover:border-zinc-700'
+          ? 'border border-red-500/30 bg-gradient-to-r from-red-500/10 to-transparent hover:from-red-500/15' 
+          : 'border border-white/[0.06] bg-[#0A0A0F] hover:border-blue-500/30 hover:bg-[#0D0D14]'
       }`}
       data-testid={`assignment-${unit.unit_id}`}
     >
       <div className="flex items-center gap-4">
-        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${config.bg}`}>
+        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${config.bg} border ${config.border}`}>
           <Icon className={`w-5 h-5 ${config.color}`} />
         </div>
         <div>
-          <div className="font-medium">{unit.title}</div>
-          <div className="text-xs text-zinc-500 mt-0.5">
-            {unit.project_name || 'Project'} · {unit.unit_type || 'Task'} · {unit.estimated_hours}h
+          <div className="font-semibold text-white group-hover:text-blue-400 transition-colors">{unit.title}</div>
+          <div className="text-sm text-white/40 mt-0.5 flex items-center gap-2">
+            <span>{unit.project_name || 'Project'}</span>
+            <span className="w-1 h-1 rounded-full bg-white/20" />
+            <span>{unit.estimated_hours}h estimated</span>
           </div>
         </div>
       </div>
       
       <div className="flex items-center gap-3">
-        <span className={`px-2 py-1 text-xs rounded-lg ${config.bg} ${config.color}`}>
+        <span className={`px-3 py-1.5 text-xs rounded-lg border ${config.bg} ${config.color} ${config.border}`}>
           {config.label}
         </span>
-        <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 transition-colors" />
+        <ChevronRight className="w-5 h-5 text-white/20 group-hover:text-blue-400 transition-colors" />
       </div>
     </button>
   );
